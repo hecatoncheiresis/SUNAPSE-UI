@@ -4,6 +4,10 @@
 
 A local-first node-based web application (ComfyUI-style) for multi-stage reasoning with LLMs, structured context compression via Lens Nodes, and transparent storage in plain Markdown files.
 
+**More detailed and comprehensive information can be found in SUNAPSE-UI_ug_EN.pdf**
+
+**Более подробную и исчерпывающую информацию можно найти в SUNAPSE-UI_ug_RU.pdf**
+
 [![Node.js](https://img.shields.io/badge/Node.js-LTS-339933?logo=node.js&logoColor=white)](#quick-start)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Fastify_%2B_React-3178C6?logo=typescript&logoColor=white)](#architecture)
 [![React Flow](https://img.shields.io/badge/Canvas-@xyflow%2Freact-FF0072)](#working-with-the-canvas)
@@ -21,8 +25,7 @@ A local-first node-based web application (ComfyUI-style) for multi-stage reasoni
 ## 🇬🇧 English
 
 ### Overview
-
-Long conversations with Large Language Models suffer from context bloat, noise accumulation, and attention degradation. **Reasoning Canvas** (`SYNAPSE-UI`) solves this by turning linear chats into a visual reasoning graph:
+Long conversations with Large Language Models suffer from context bloat, noise accumulation, and attention degradation. **SYNAPSE-UI** solves this by turning linear chats into a visual reasoning graph:
 
 Chat Node ---→ Lens Node (Digest) ---→ Chat Node
 
@@ -213,7 +216,7 @@ e2e/                      # Playwright end-to-end browser tests
 
 ### О проекте
 
-При длинных диалогах с большими языковыми моделями (LLM) контекст разрастается, накапливается информационный шум и снижается качество внимания модели. **Reasoning Canvas** (`SYNAPSE-UI`) решает эту проблему, превращая линейную переписку в визуальный граф рассуждений:
+При длинных диалогах с большими языковыми моделями (LLM) контекст разрастается, накапливается информационный шум и снижается качество внимания модели. **SYNAPSE-UI** решает эту проблему, превращая линейную переписку в визуальный граф рассуждений:
 
 Chat Node ---→ Lens Node (Digest) ---→ Chat Node
 
