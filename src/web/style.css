@@ -1,0 +1,190 @@
+:root {
+  color-scheme: dark;
+  --bg: #202020;
+  --surface: #353535;
+  --surface-2: #404040;
+  --lens: #2b2b2b;
+  --border: #3f3f46;
+  --text: #ffffff;
+  --muted: #a1a1aa;
+  --panel: #1e1e1e;
+  --ok: #22c55e;
+  --accent: #3b82f6;
+  --danger: #ff6b7d;
+  --warn: #e0b04a;
+}
+html, body, #root { height: 100%; margin: 0; overflow: hidden; overscroll-behavior: none; font-family: var(--ui-font, system-ui, sans-serif); background: var(--bg); color: var(--text); }
+button, select, input, textarea { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 4px 8px; font: inherit; }
+button { cursor: pointer; }
+button:hover:not(:disabled) { border-color: var(--accent); }
+button:disabled { opacity: 0.5; cursor: default; }
+textarea { resize: vertical; }
+code { color: var(--muted); }
+.canvas { height: 100%; position: relative; }
+.start { display: flex; gap: 32px; max-width: 1200px; margin: 40px auto; padding: 0 16px; align-items: flex-start; }
+.start .picker { flex: 1 1 0; min-width: 0; max-width: none; margin: 0; padding: 0; }
+.start .thanks { flex: 1 1 0; min-width: 0; padding-left: 32px; border-left: 1px solid rgba(128, 128, 128, 0.35); overflow-wrap: anywhere; }
+.start .thanks .muted { opacity: 0.6; }
+@media (max-width: 800px) { .start { flex-direction: column; } .start .thanks { padding-left: 0; border-left: 0; } }
+.picker { max-width: 560px; margin: 40px auto; padding: 0 16px; }
+.picker ul { list-style: none; padding: 0; max-height: 320px; overflow: auto; }
+.picker li button { width: 100%; text-align: left; }
+.picker li code { margin-left: 8px; }
+.picker .row { display: flex; gap: 8px; margin-top: 12px; }
+.err { color: var(--danger); }
+.model-panel { padding: 16px; }
+.model-form { display: flex; flex-direction: column; gap: 8px; max-width: 420px; }
+.model-form label { display: flex; flex-direction: column; gap: 2px; }
+
+.sidebar { position: absolute; z-index: 10; top: 0; left: 0; bottom: 0; display: flex; align-items: flex-start; gap: 4px; padding: 8px; background: rgba(30, 30, 30, 0.85); backdrop-filter: blur(6px); border-right: 1px solid var(--border); }
+.sidebar.collapsed { padding: 8px 2px; background: rgba(30, 30, 30, 0.5); }
+.sidebar-body { display: flex; flex-direction: column; gap: 8px; }
+.sidebar-toggle { padding: 2px 8px; }
+
+/* A Node being placed hangs on the cursor by its top-left corner until a click puts it down. */
+.placing-ghost { position: fixed; z-index: 25; pointer-events: none; box-sizing: border-box; border: 2px dashed var(--accent); background: rgba(59, 130, 246, 0.12); border-radius: 8px; padding: 6px 10px; color: var(--muted); }
+.canvas-menu { position: fixed; z-index: 30; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 4px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5); }
+.canvas-menu button { display: block; border: none; background: transparent; width: 100%; text-align: left; }
+.canvas-menu button:hover { background: var(--accent); color: #fff; }
+.modal-backdrop { position: fixed; z-index: 40; inset: 0; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: flex-start; padding-top: 15vh; }
+.node-search { width: 420px; max-width: 90vw; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+.node-search input { width: 100%; box-sizing: border-box; padding: 8px; }
+.node-search ul { list-style: none; margin: 8px 0 0; padding: 0; }
+.node-search li button { width: 100%; text-align: left; border: none; background: transparent; padding: 8px; }
+.node-search li button:hover { background: var(--accent); color: #fff; }
+.node-search-row { display: flex; }
+.node-search-row .gear { width: auto; text-align: center; padding: 8px 12px; }
+.node-defaults { display: flex; flex-direction: column; gap: 10px; }
+.node-defaults label { display: flex; flex-direction: column; gap: 4px; }
+.node-defaults textarea, .node-defaults select, .node-defaults input { box-sizing: border-box; width: 100%; }
+.node-defaults .row { display: flex; gap: 6px; }
+.node-defaults-head { display: flex; align-items: center; gap: 10px; }
+.muted { color: var(--muted); padding: 8px; }
+
+/* Nodes: the frame drags the Node; its interactive content carries .nodrag. */
+.react-flow__node { cursor: grab; }
+.react-flow__node:focus, .react-flow__node:focus-visible, .react-flow:focus, .react-flow__pane:focus, .react-flow__renderer:focus { outline: none; }
+.react-flow__node.selected, .react-flow__node:focus-visible { box-shadow: none; }
+.node-bar { cursor: grab; user-select: none; min-height: 22px; }
+.node-shell { --frame: linear-gradient(var(--border), var(--border)); width: 100%; height: 100%; display: flex; flex-direction: column; border: 2px solid transparent; border-radius: 8px; box-sizing: border-box; padding: 6px; background: linear-gradient(var(--surface), var(--surface)) padding-box, var(--frame) border-box; }
+/* Selected: a plain, slightly lighter frame in the Node's own tone, no glow. At the Focus Zoom a Node shows no highlight. */
+.node-shell.selected:not(.working) { --frame: linear-gradient(#5a5a63, #566072); }
+.node-bar { min-height: 10px; }
+/* Nodes can be worked in only at the Focus Zoom; at any smaller zoom their content is read-only and wheel/clicks fall through to the Canvas. */
+.node-shell:not(.working) .node-body :is(button, select, input, textarea, .qa, .handoff) { pointer-events: none; }
+.node-body { flex: 1; min-height: 0; cursor: default; }
+.chat-node .chat-rest { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: 6px; }
+/* Node name and number: written vertically along the left edge, reading bottom to top. */
+.node-label { flex: 0 0 auto; writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; align-self: stretch; text-align: center; }
+.lens-node .handoff > b { align-self: center; text-align: center; }
+.chat-node, .lens-node { height: 100%; box-sizing: border-box; display: flex; flex-direction: column; gap: 6px; font-size: 0.875rem; }
+.chat-node { flex-direction: row; }
+.chat-node .qa { flex: 1; min-height: 0; overflow: auto; background: var(--bg); border-radius: 6px; padding: 4px 10px; cursor: text; user-select: text; }
+.chat-node .qa p { margin: 6px 0; white-space: pre-wrap; }
+.chat-node .qa .q { margin: 6px 0 6px auto; width: fit-content; max-width: 80%; background: var(--surface); padding: 2px 10px; border-radius: 12px; }
+.chat-node .qa .a { max-width: 92%; }
+.chat-node .qa .answer-model { display: block; margin-bottom: 8px; }
+.chat-node .chat-body, .lens-node { min-height: 0; }
+.chat-node .chat-body { flex: 1; display: flex; gap: 6px; }
+.chat-node .chat-main { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: 6px; }
+.chat-node .composer { display: flex; flex-direction: column; gap: 4px; border: 1px solid var(--border); border-radius: 10px; padding: 6px; }
+.chat-node .composer textarea { min-height: 0; resize: none; border: none; outline: none; background: transparent; line-height: 1.3125rem; }
+.chat-node .composer select { align-self: flex-end; }
+.lens-node { flex-direction: column; background: var(--lens); border-radius: 6px; padding: 8px; }
+.lens-node .lens-top { flex: 0 0 auto; position: relative; display: flex; justify-content: center; align-items: center; min-height: 24px; }
+.lens-node .lens-top .remove-node, .lens-node .lens-top .remove-confirm { position: absolute; right: 0; top: 0; background: var(--lens); }
+.lens-node .lens-title { flex: 0 0 auto; text-align: center; }
+.lens-node .lens-body { flex: 1; min-height: 0; display: flex; flex-direction: row; gap: 6px; }
+.lens-input-side { flex: 0 0 auto; display: flex; flex-direction: column; margin-left: 6px; }
+.lens-input-side .token-figures { transform: rotate(180deg); }
+.lens-input-side .token-glass { flex: 1; width: 0.875rem; margin-right: 0; }
+.lens-node .lens-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.lens-node textarea { min-height: 70px; }
+/* Handoff Questionnaire: the block scrolls inside the Node, so the Node keeps its Standard Size. */
+.lens-node .handoff { flex: 1 1 auto; min-height: 90px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 4px; }
+.lens-node .handoff label { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; }
+.lens-node .handoff label > span { font-size: 0.9375rem; font-weight: 600; color: var(--text); }
+.lens-node .handoff textarea { min-height: 52px; font-size: 0.9375rem; resize: none; overflow: hidden; }
+.lens-node .run-row { display: flex; align-items: center; gap: 6px; }
+.lens-node .run-row .run-button { flex: 1; padding: 2px 10px; font-size: 0.8125rem; }
+.lens-node .handoff > b { font-size: 1rem; }
+.lens-side .digest-size { flex: 1; writing-mode: vertical-rl; white-space: nowrap; font-size: 0.9375rem; color: var(--muted); text-align: center; }
+.lens-node textarea.digest { flex: 0 0 120px; resize: none; }
+.lens-node .lens-halves { flex: 1; min-height: 0; display: flex; flex-direction: row; gap: 10px; }
+.lens-node .extract-half, .lens-node .lens-half { flex: 1 1 0; min-width: 0; min-height: 0; display: flex; flex-direction: row; gap: 6px; }
+.lens-node .extract-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.lens-node .extract-main > b { text-align: center; font-size: 1rem; }
+.lens-node textarea.extraction-prompt { flex: 1 1 auto; min-height: 90px; resize: none; font-size: 0.9375rem; }
+.lens-node .extract-main .run-row select { flex: 1 1 0; min-width: 0; }
+.lens-node.auto-lens .digest-row { flex: 0 0 auto; }
+/* Formatted Markdown (chat questions and answers, Digest). */
+.md { overflow-wrap: anywhere; line-height: 1.45; }
+.md > :first-child { margin-top: 4px; }
+.md > :last-child { margin-bottom: 4px; }
+.md :is(p, ul, ol, pre, table, blockquote) { margin: 6px 0; }
+.md :is(h1, h2, h3, h4, h5, h6) { margin: 10px 0 4px; line-height: 1.25; }
+.md h1 { font-size: 1.35em; } .md h2 { font-size: 1.2em; } .md h3 { font-size: 1.07em; } .md :is(h4, h5, h6) { font-size: 1em; }
+.md :is(ul, ol) { padding-left: 1.4em; }
+.md code { background: var(--surface); padding: 0.05em 0.35em; border-radius: 4px; color: var(--text); }
+.md pre { background: var(--surface); padding: 8px 10px; border-radius: 6px; overflow-x: auto; }
+.md pre code { background: none; padding: 0; }
+.md blockquote { border-left: 3px solid var(--border); margin-left: 0; padding-left: 10px; color: var(--muted); }
+.md table { border-collapse: collapse; display: block; overflow-x: auto; }
+.md :is(th, td) { border: 1px solid var(--border); padding: 3px 8px; }
+.md a { color: var(--accent); }
+.md hr { border: none; border-top: 1px solid var(--border); }
+.digest-view { flex: 0 0 120px; overflow: auto; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 0 8px; cursor: text; user-select: text; box-sizing: border-box; }
+/* Pins take the colour of their Edges: white first, then green or red; a pin with no Edge is white. */
+.react-flow__handle.pin-white { background: #ffffff; }
+.react-flow__handle.pin-green { background: var(--ok); }
+.react-flow__handle.pin-red { background: var(--danger); }
+/* System Prompt: the gear between Fork and the trash, green while a prompt is set, and its small window. */
+.system-prompt { position: relative; display: inline-flex; }
+.gear { padding: 0.1875rem 0.375rem; line-height: 0; }
+.gear-icon { width: 1rem; height: 1rem; }
+.gear.set { color: var(--ok); border-color: var(--ok); }
+.system-prompt-window { position: absolute; z-index: 20; top: calc(100% + 4px); right: 0; width: 20rem; display: flex; flex-direction: column; gap: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.4); }
+.system-prompt-window textarea { resize: vertical; }
+.edge-error { position: absolute; z-index: 10; top: 12px; left: 200px; background: var(--surface); padding: 4px 8px; border: 1px solid var(--danger); border-radius: 4px; }
+
+.react-flow { --xy-background-color: var(--bg); --xy-background-pattern-color: #2e2e2e; }
+.react-flow__edge-path, .react-flow__connection-path { stroke: #a1a1aa; stroke-width: 1.8rem; }
+/* Edge State: white = nothing taken in yet, green = both Nodes agree, red = they have drifted apart */
+.react-flow__edge.edge-white .react-flow__edge-path { stroke: #ffffff; }
+.react-flow__edge.edge-green .react-flow__edge-path { stroke: var(--ok); }
+.react-flow__edge.edge-red .react-flow__edge-path { stroke: var(--danger); }
+.react-flow__edge:hover .react-flow__edge-path { stroke: var(--accent); }
+/* Edge thickness is 0.8 of the pin height (2.25rem). */
+/* Pins are half-discs: the flat side sits on the Node, the round side points outward. */
+.react-flow__handle { z-index: 5; width: 1.125rem; height: 2.25rem; min-width: 0; background: #ffffff; border: none; }
+.react-flow__handle-left { border-radius: 2.25rem 0 0 2.25rem; transform: translate(-100%, -50%); }
+.react-flow__handle-right { border-radius: 0 2.25rem 2.25rem 0; transform: translate(100%, -50%); }
+
+/* Token Meter: a glass along the right edge, inside the Node; the gradient is fixed by height, the rest is covered from the top. */
+.token-glass { flex: 0 0 0.875rem; align-self: stretch; margin-right: 0.375rem; position: relative; overflow: hidden; border-radius: 6px; border: 1px solid var(--border); background: linear-gradient(0deg, hsl(120 70% 45%), hsl(60 70% 45%), hsl(0 70% 45%)); }
+.token-rest { position: absolute; inset: 0 0 auto 0; background: #4a4a4a; }
+.token-figures { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; writing-mode: vertical-rl; font-size: 0.625rem; line-height: 1; color: #fff; text-shadow: 0 0 3px #000, 0 0 3px #000; white-space: nowrap; }
+.fork-caption { color: var(--muted); font-size: 0.75rem; }
+.answer-model { color: var(--muted); font-size: 0.75rem; }
+
+/* Warnings float over the Canvas: in the page flow they made the page taller than the window, so it scrolled. */
+.warnings { position: absolute; z-index: 10; top: 8px; left: 50%; transform: translateX(-50%); max-width: 70%; display: flex; flex-direction: column; gap: 4px; pointer-events: none; }
+.warning { color: var(--warn); background: var(--surface); border: 1px solid var(--warn); border-radius: 4px; padding: 4px 8px; }
+
+
+/* Top row of a Node: actions pushed to the right, the trash icon rightmost. */
+.node-top { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+.remove-node { padding: 0.1875rem 0.375rem; line-height: 0; }
+.remove-icon { width: 1rem; height: 1rem; }
+.remove-confirm { white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; font-size: 0.8125rem; }
+.remove-confirm .danger { background: var(--danger); color: #fff; }
+/* Lens Node: the trash icon sits above the glass; its confirmation opens to the left so the column stays narrow. */
+.lens-side { position: relative; flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 6px; margin-right: 6px; }
+.lens-side .token-glass { flex: 1; width: 0.875rem; margin-right: 0; align-self: center; }
+
+.display-settings { box-sizing: border-box; height: 100%; overflow-y: auto; padding: 24px; max-width: 560px; }
+.display-settings .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0 20px; }
+.display-settings label { display: flex; flex-direction: column; gap: 2px; }
+.display-settings .wide { grid-column: 1 / -1; }
+.display-settings .row { display: flex; gap: 8px; }
+.display-settings .invalid { border-color: var(--danger); }
