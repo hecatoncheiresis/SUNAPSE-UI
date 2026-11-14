@@ -1,4 +1,4 @@
-# Reasoning Canvas (`SYNAPSE-UI`)
+#  `SYNAPSE-UI`
 
 **Synchronous Yielding Node Assistant with Persistent Storage and Exchange User Interface**
 
