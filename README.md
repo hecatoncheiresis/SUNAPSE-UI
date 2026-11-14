@@ -205,7 +205,6 @@ e2e/                      # Playwright end-to-end browser tests
 | `npm run typecheck` | Run TypeScript compiler type check |
 | `npm run check:ui` | Build frontend + run Playwright E2E browser scenarios |
 
-* **Further Documentation**: [`GLOSSARY.md`](GLOSSARY.md) (ubiquitous domain language), [`CODING_STANDARDS.md`](CODING_STANDARDS.md), and [`docs/adr/`](docs/adr) (Architecture Decision Records).
 
 ---
 ---
@@ -396,4 +395,3 @@ e2e/                      # Сквозные браузерные тесты н�
 | `npm run typecheck` | Проверка типов TypeScript |
 | `npm run check:ui` | Сборка фронтенда и запуск E2E-сценариев в браузере (Playwright) |
 
-* **Дополнительная документация**: [`GLOSSARY.md`](GLOSSARY.md) (словарь терминов предметной области), [`CODING_STANDARDS.md`](CODING_STANDARDS.md) и [`docs/adr/`](docs/adr) (архитектурные решения).
