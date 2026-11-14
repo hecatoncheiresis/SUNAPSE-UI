@@ -1,3 +1,5 @@
+SYNAPSE-UI Synchronous Yielding Node Assistant with Persistent Storage and Exchange User Interface
+
 Good afternoon, dear GitHub users, I’ve decided to share my program that helps me conduct lengthy discussions and research on various topics.
 I’m developing this program for myself, using approaches that are convenient for me. If you have any suggestions on how to improve the program, please create a fork and make your own version of this program.You can find detailed READMEs in the repository.
 My future plans:
